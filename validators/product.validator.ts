@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createBlogSchema = z.object({
+export const createProductSchema = z.object({
   title: z.string(),
   price: z.number(),
   description: z.string().optional(),
@@ -10,7 +10,7 @@ export const createBlogSchema = z.object({
   stock: z.number().optional(),
 });
 
-export const updateBlogSchema = z.object({
+export const updateProductSchema = z.object({
   title: z.string().optional(),
   price: z.number().optional(),
   description: z.string().optional(),

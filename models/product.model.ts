@@ -1,6 +1,7 @@
 import mongoose, { Types } from "mongoose";
+import { IProduct } from "../types/product.type";
 
-const productSchema = new mongoose.Schema(
+const productSchema = new mongoose.Schema<IProduct>(
   {
     title: {
       type: String,
@@ -41,12 +42,12 @@ const productSchema = new mongoose.Schema(
 
     price: {
       type: Number,
-      defualt: 0,
+      default: 0,
       required: true,
     },
     stock: {
       type: Number,
-      defualt: 0,
+      default: 0,
     },
     // total reviewrs number only
     reviewers: {
@@ -66,6 +67,6 @@ const productSchema = new mongoose.Schema(
 
 productSchema.index({ slug: 1 }, { unique: true });
 
-const Product = mongoose.model("Product", productSchema);
+const Product = mongoose.model<IProduct>("Product", productSchema);
 
 export default Product;

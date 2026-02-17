@@ -1,14 +1,20 @@
 import express from "express";
-
+import dotenv from "dotenv";
+dotenv.config();
 import cors from "cors";
 
 import { ApiError } from "./utils/ApiError";
+import { connectDB } from "./utils/db.config";
+const PORT = process.env.PORT || 5000;
 
 const server = express();
 
+// connect DB
+connectDB();
+
 server.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "http://localhost:3000",
   }),
 );
 
@@ -29,10 +35,10 @@ server.use((err: any, req: any, res: any, next: any) => {
   });
 });
 
-server.listen(3000, (err?: Error) => {
+server.listen(PORT, (err?: Error) => {
   if (err) {
     console.log(err);
   } else {
-    console.log("server is running on port 3000");
+    console.log(`server is running on port ${PORT}`);
   }
 });

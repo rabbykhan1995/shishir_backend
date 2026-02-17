@@ -1,12 +1,14 @@
 import mongoose, { Types } from "mongoose";
+import { IBlog } from "../types/blog.type";
 
-const blogSchema = new mongoose.Schema(
+const blogSchema = new mongoose.Schema<IBlog>(
   {
     title: {
       type: String,
       required: true,
       trim: true,
     },
+    slug: { type: String, required: true, trim: true },
 
     description: {
       type: String,
@@ -35,6 +37,8 @@ const blogSchema = new mongoose.Schema(
   },
 );
 
-const Blog = mongoose.model("Blog", blogSchema);
+blogSchema.index({ slug: 1 }, { unique: true });
+
+const Blog = mongoose.model<IBlog>("Blog", blogSchema);
 
 export default Blog;
