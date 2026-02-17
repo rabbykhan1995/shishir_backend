@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, HydratedDocument, Types } from "mongoose";
 import z from "zod";
 import {
   createProductSchema,
@@ -21,6 +21,24 @@ export interface IProduct extends Document {
   updatedAt: Date;
 }
 
+export type ProductResponse = HydratedDocument<IProduct>;
+
 export type CreateProductInput = z.infer<typeof createProductSchema>;
 
 export type UpdateProductInput = z.infer<typeof updateProductSchema>;
+
+export type ProductListItem = Pick<
+  IProduct,
+  "title" | "slug" | "rating" | "thumbnail"
+> & {
+  _id: Types.ObjectId;
+};
+
+export type PaginatedResponse<T> = {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
+export type ProductListResponse = PaginatedResponse<ProductListItem>;

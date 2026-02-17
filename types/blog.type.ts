@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, HydratedDocument, Types } from "mongoose";
 import z from "zod";
 import {
   createBlogSchema,
@@ -17,6 +17,24 @@ export interface IBlog extends Document {
   updatedAt: Date;
 }
 
+export type BlogResponse = HydratedDocument<IBlog>;
+
 export type CreateBlogInput = z.infer<typeof createBlogSchema>;
 
 export type UpdateBlogInput = z.infer<typeof updateBlogSchema>;
+
+export type BlogListItem = Pick<
+  IBlog,
+  "title" | "slug" | "thumbnail" | "createdAt"
+> & {
+  _id: Types.ObjectId;
+};
+
+export type PaginatedResponse<T> = {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
+export type BlogListResponse = PaginatedResponse<BlogListItem>;

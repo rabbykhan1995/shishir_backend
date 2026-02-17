@@ -17,10 +17,11 @@ router
     asyncHandler(ProductController.create),
   )
   .put(
-    "/update",
+    "/update/:id",
     validate(updateProductSchema),
     asyncHandler(ProductController.update),
   )
-  .get("/list", asyncHandler(ProductController.list));
+  .get("/list", asyncHandler(ProductController.list))
+  .get("/productBySlug/:slug", asyncHandler(ProductController.productBySlug));
 
 export default router;
