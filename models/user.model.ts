@@ -1,6 +1,7 @@
 import mongoose, { Types } from "mongoose";
+import { IUser } from "../types/user.type";
 
-const userSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema<IUser>(
   {
     name: {
       type: String,
@@ -19,11 +20,6 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
-    images: {
-      type: [String],
-      default: [],
-    },
-
     password: {
       type: String,
       default: null,
@@ -37,6 +33,9 @@ const userSchema = new mongoose.Schema(
     mobile: {
       type: String,
       default: null,
+    },
+    address: {
+      type: String,
     },
   },
   {
@@ -58,6 +57,6 @@ userSchema.index(
   },
 );
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model<IUser>("User", userSchema);
 
 export default User;

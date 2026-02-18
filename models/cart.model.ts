@@ -1,10 +1,16 @@
 import mongoose, { Types } from "mongoose";
+import { ICart } from "../types/cart.type";
 
-const cartSchema = new mongoose.Schema(
+const cartSchema = new mongoose.Schema<ICart>(
   {
     itemID: {
       type: Types.ObjectId,
       ref: "Experience",
+      required: true,
+    },
+    userID: {
+      type: Types.ObjectId,
+      ref: "User",
       required: true,
     },
 
@@ -37,6 +43,8 @@ const cartSchema = new mongoose.Schema(
   },
 );
 
-const Cart = mongoose.model("Cart", cartSchema);
+cartSchema.index({ userID: 1, itemID: 1 }, { unique: true });
+
+const Cart = mongoose.model<ICart>("Cart", cartSchema);
 
 export default Cart;
