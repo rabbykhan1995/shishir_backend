@@ -24,7 +24,10 @@ const userSchema = new mongoose.Schema<IUser>(
       type: String,
       default: null,
     },
-
+    admin: {
+      type: Boolean,
+      default: false,
+    },
     email: {
       type: String,
       default: null,

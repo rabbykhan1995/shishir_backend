@@ -21,14 +21,14 @@ export class UserController {
 
     const existedEmail = await User.findOne({ email: payload.email });
     if (existedEmail) {
-      throw new ApiError(401, "Email already exists");
+      throw new ApiError(409, "Email already exists");
     }
 
     if (payload.mobile) {
       const existedMobile = await User.findOne({ mobile: payload.mobile });
 
       if (existedMobile) {
-        throw new ApiError(401, "Mobile already exists");
+        throw new ApiError(409, "Mobile already exists");
       }
     }
 
@@ -41,7 +41,7 @@ export class UserController {
     });
 
     if (!user) {
-      throw new ApiError(401, "User registration failed");
+      throw new ApiError(500, "User registration failed");
     }
 
     const token: string = Helper.generateToken(user);
@@ -56,93 +56,90 @@ export class UserController {
       token,
     });
   }
-  static async getGoogleRegistrationAPI(req: Request, res: Response) {
+  static async getGoogleAuthAPI(req: Request, res: Response) {
     const redirectURL =
       "https://accounts.google.com/o/oauth2/v2/auth?" +
       new URLSearchParams({
         client_id: process.env.GOOGLE_CLIENT_ID!,
-        redirect_uri: "http://localhost:5000/api/auth/google/callback",
+        redirect_uri: "http://localhost:5000/api/user/google-auth-callback",
         response_type: "code",
         scope: "openid email profile",
         state: "google_private_random_string_you_can_give_anything",
       });
 
-    res.json({ url: redirectURL });
+    res.redirect(redirectURL);
   }
 
-  static async googleRegistrationCallbackAPI(req: Request, res: Response) {
-    try {
-      const code = req.query.code as string;
+  static async googleAuthCallbackAPI(req: Request, res: Response) {
+    const code = req.query.code as string;
 
-      if (!code) {
-        throw new ApiError(400, "Authorization code missing");
-      }
-
-      const tokenResponse = await axios.post(
-        "https://oauth2.googleapis.com/token",
-        new URLSearchParams({
-          code,
-          client_id: process.env.GOOGLE_CLIENT_ID!,
-          client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-          redirect_uri: "http://localhost:5000/api/auth/google/callback",
-          grant_type: "authorization_code",
-        }),
-        {
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        },
-      );
-
-      const { access_token } = tokenResponse.data;
-
-      const userInfoResponse = await axios.get(
-        "https://www.googleapis.com/oauth2/v2/userinfo",
-        {
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-          },
-        },
-      );
-
-      const googleUser = userInfoResponse.data;
-
-      let user = await User.findOne({ openID: googleUser.id });
-
-      if (!user) {
-        user = await User.create({
-          name: googleUser.name,
-          email: googleUser.email,
-          openID: googleUser.id,
-          image: googleUser.picture,
-        });
-      }
-
-      const token = Helper.generateToken({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        mobile: user.mobile,
-      });
-
-      res.cookie("token", token, { httpOnly: true });
-
-      res.redirect("http://localhost:3000/dashboard");
-    } catch (error) {
-      res.status(500).json({ msg: "Google authentication failed" });
+    if (!code) {
+      throw new ApiError(400, "Authorization code missing");
     }
+
+    const tokenResponse = await axios.post(
+      "https://oauth2.googleapis.com/token",
+      new URLSearchParams({
+        code,
+        client_id: process.env.GOOGLE_CLIENT_ID!,
+        client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+        redirect_uri: "http://localhost:5000/api/user/google-auth-callback",
+        grant_type: "authorization_code",
+      }),
+      {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      },
+    );
+
+    const { access_token } = tokenResponse.data;
+
+    const userInfoResponse = await axios.get(
+      "https://www.googleapis.com/oauth2/v2/userinfo",
+      {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      },
+    );
+
+    const googleUser = userInfoResponse.data;
+
+    let user = await User.findOne({ openID: googleUser.id });
+
+    if (!user) {
+      user = await User.create({
+        name: googleUser.name,
+        email: googleUser.email,
+        openID: googleUser.id,
+        image: googleUser.picture,
+      });
+    }
+
+    const token = Helper.generateToken({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      mobile: user.mobile,
+      admin: user.admin,
+    });
+
+    res.cookie("token", token, { httpOnly: true });
+
+    res.redirect("http://localhost:3000");
   }
   static async registerWithGoogle(req: Request, res: Response) {
     const payload: CreateUserInput = req.body;
 
     const existedEmail = await User.findOne({ email: payload.email });
     if (existedEmail) {
-      throw new ApiError(401, "Email already exists");
+      throw new ApiError(409, "Email already exists");
     }
 
     if (payload.mobile) {
       const existedMobile = await User.findOne({ mobile: payload.mobile });
 
       if (existedMobile) {
-        throw new ApiError(401, "Mobile already exists");
+        throw new ApiError(409, "Mobile already exists");
       }
     }
 
@@ -155,7 +152,7 @@ export class UserController {
     });
 
     if (!user) {
-      throw new ApiError(401, "User registration failed");
+      throw new ApiError(500, "User registration failed");
     }
 
     const token: string = Helper.generateToken(user);
@@ -170,42 +167,17 @@ export class UserController {
     });
   }
 
-  /**
-   * Update a cart item (quantity)
-   */
-  static async update(req: Request, res: Response) {
+  static async getProfileData(req: Request, res: Response) {
     const userID: Types.ObjectId = req.user!._id;
-    const payload: UpdateUserInput = req.body;
 
-    const user = await User.findById(userID);
+    const user: UserResponse | null = await User.findById(userID);
 
     if (!user) {
-      throw new ApiError(404, "user not found");
+      throw new ApiError(404, "User Not Found");
     }
 
-    res.status(200).json({
-      success: true,
-      data: item,
-    });
-  }
-
-  /**
-   * Delete a cart item
-   */
-  static async delete(req: Request, res: Response) {
-    const id = req.params.id;
-    const item = await Cart.findByIdAndDelete(id);
-
-    if (!item) {
-      return res.status(404).json({
-        success: false,
-        message: "Cart item not found",
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: "Cart item removed successfully",
-    });
+    return res
+      .status(200)
+      .json({ msg: "user fetched successfully", data: user, success: true });
   }
 }
