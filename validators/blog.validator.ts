@@ -2,20 +2,18 @@ import { z } from "zod";
 
 export const createBlogSchema = z.object({
   title: z.string(),
-  price: z.number(),
   description: z.string().optional(),
   shortDescription: z.string().optional(),
   thumbnail: z.string().nullable().optional(),
+  tags: z.array(z.string()).default([]),
   images: z.array(z.string()).optional(),
-  stock: z.number().optional(),
 });
 
 export const updateBlogSchema = z.object({
   title: z.string().optional(),
-  price: z.number().optional(),
   description: z.string().optional(),
   shortDescription: z.string().optional(),
+  tags: z.array(z.string()).default([]),
   thumbnail: z.string().nullable().optional(),
   images: z.array(z.string()).optional(),
-  stock: z.number().optional(),
 });

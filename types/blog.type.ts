@@ -25,7 +25,7 @@ export type UpdateBlogInput = z.infer<typeof updateBlogSchema>;
 
 export type BlogListItem = Pick<
   IBlog,
-  "title" | "slug" | "thumbnail" | "createdAt"
+  "title" | "slug" | "thumbnail" | "createdAt" | "shortDescription"
 > & {
   _id: Types.ObjectId;
 };

@@ -1,27 +1,33 @@
 import express from "express";
-import { validate } from "../middlewares/validation.middleware.ts";
-// import { createProductSchema } from "../validators/product.validator";
-import { asyncHandler } from "../utils/asyncHandler";
+import { BlogController } from "../controllers/blog.controller";
+import { authMiddleware } from "../middlewares/auth.middleware";
+import { adminMiddleware } from "../middlewares/admin.middleware";
+import { validate } from "../middlewares/validation.middleware";
 import {
   createBlogSchema,
   updateBlogSchema,
-} from "../validators/blog.validator.ts";
-import { BlogController } from "../controllers/blog.controller.ts";
+} from "../validators/blog.validator";
+import { asyncHandler } from "../utils/asyncHandler";
 
 const router = express.Router();
 
-router
-  .post(
-    "/create",
-    validate(createBlogSchema),
-    asyncHandler(BlogController.create),
-  )
-  .put(
-    "/update/:id",
-    validate(updateBlogSchema),
-    asyncHandler(BlogController.update),
-  )
-  .get("/list", asyncHandler(BlogController.list))
-  .get("/blogBySlug/:slug", asyncHandler(BlogController.blogBySlug));
+router.post(
+  "/create",
+  authMiddleware,
+  adminMiddleware,
+  validate(createBlogSchema),
+  asyncHandler(BlogController.create),
+);
+
+router.put(
+  "/update/:id",
+  authMiddleware,
+  adminMiddleware,
+  validate(updateBlogSchema),
+  asyncHandler(BlogController.update),
+);
+
+router.get("/list", asyncHandler(BlogController.list));
+router.get("/blogBySlug/:slug", asyncHandler(BlogController.blogBySlug));
 
 export default router;

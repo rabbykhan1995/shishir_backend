@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
 import { UserInToken } from "../types/user.type";
 import { ApiError } from "../utils/ApiError";
+import Helper from "../utils/helper";
 
 interface AuthRequest extends Request {
   user?: UserInToken;
@@ -35,7 +35,7 @@ export const authMiddleware = (
 
     if (!secret) throw new Error("JWT_SECRET is not defined in .env");
 
-    const decoded = jwt.verify(token, secret) as UserInToken;
+    const decoded = Helper.verifyToken(token) as UserInToken;
 
     if (!decoded) {
       res.clearCookie("token");
@@ -47,6 +47,6 @@ export const authMiddleware = (
     next();
   } catch (error: any) {
     res.clearCookie("token");
-    throw new ApiError(401, "Unauthorized request");
+    next(new ApiError(401, "Unauthorized request"));
   }
 };

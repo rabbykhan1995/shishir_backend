@@ -27,6 +27,7 @@ export class BlogController {
       slug,
     });
     res.status(201).json({
+      msg: "blog created successfully",
       success: true,
       data: blog,
     });
