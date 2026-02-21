@@ -1,6 +1,7 @@
 import mongoose, { Types } from "mongoose";
+import { ITraining } from "../types/training.type";
 
-const trainingSchema = new mongoose.Schema(
+const trainingSchema = new mongoose.Schema<ITraining>(
   {
     title: {
       type: String,
@@ -9,8 +10,6 @@ const trainingSchema = new mongoose.Schema(
     },
     slug: {
       type: String,
-      required: true,
-      unique: true,
       lowercase: true,
       trim: true,
     },
@@ -50,6 +49,10 @@ const trainingSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    tags: {
+      type: [String],
+      default: [],
+    },
 
     levelID: {
       type: Types.ObjectId,
@@ -73,6 +76,6 @@ const trainingSchema = new mongoose.Schema(
 );
 trainingSchema.index({ slug: 1 }, { unique: true });
 
-const Training = mongoose.model("Training", trainingSchema);
+const Training = mongoose.model<ITraining>("Training", trainingSchema);
 
 export default Training;

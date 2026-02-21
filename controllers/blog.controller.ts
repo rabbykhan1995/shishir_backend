@@ -67,7 +67,7 @@ export class BlogController {
       Blog.find(filter)
         .skip(search ? 0 : skip)
         .limit(search ? 0 : limit)
-        .select("title slug rating thumbnail")
+        .select("title slug thumbnail createdAt updatedAt shortDescription")
         .lean(),
 
       Blog.countDocuments(filter),
