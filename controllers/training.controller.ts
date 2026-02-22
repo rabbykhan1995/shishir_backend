@@ -1,12 +1,17 @@
 import { Request, Response } from "express";
 import {
+  CreateLevelInput,
   CreateTrainingInput,
+  LevelResponse,
   TrainingListResponse,
   TrainingResponse,
   UpdateTrainingInput,
 } from "../types/training.type";
 import Helper from "../utils/helper";
 import Training from "../models/training.model";
+import Level from "../models/level.model";
+import { ApiError } from "../utils/ApiError";
+import { Types } from "mongoose";
 
 export class TrainingController {
   constructor() {
@@ -106,6 +111,93 @@ export class TrainingController {
     res.status(200).json({
       success: true,
       data: training,
+    });
+  }
+
+  static async createLevel(req: Request, res: Response) {
+    const payload: CreateLevelInput = req.body;
+
+    const exist: LevelResponse | null = await Level.findOne({
+      name: payload.name.trim().toLowerCase(),
+    });
+
+    if (exist) {
+      throw new ApiError(403, "Already Exist, try new one");
+    }
+
+    const newLevel: LevelResponse = await Level.create(payload);
+
+    res.status(201).json({
+      msg: "Level created successfully",
+      success: true,
+      data: newLevel,
+    });
+  }
+
+  static async levelList(req: Request, res: Response) {
+    const levels: LevelResponse[] | [] = await Level.find();
+
+    res.status(201).json({
+      msg: "Level fetched successfully",
+      success: true,
+      data: levels,
+    });
+  }
+
+  static async updateLevel(req: Request, res: Response) {
+    const levelID = req.params.id;
+    const payload: CreateLevelInput = req.body;
+
+    const level: LevelResponse | null = await Level.findById(levelID);
+
+    if (!level) {
+      throw new ApiError(404, "No level found with this id");
+    }
+
+    const exist: LevelResponse | null = await Level.findOne({
+      name: payload.name.trim().toLowerCase(),
+    });
+
+    if (exist) {
+      throw new ApiError(403, "Already Exist, try new one");
+    }
+
+    level.name = payload.name.trim().toLowerCase();
+
+    const nameAssigned: LevelResponse = await level.save();
+
+    res.status(201).json({
+      msg: "Level updated successfully",
+      success: true,
+      data: nameAssigned,
+    });
+  }
+  static async deleteLevel(req: Request, res: Response) {
+    const levelID = req.params.id;
+
+    const level = await Level.findById(levelID);
+
+    if (!level) {
+      throw new ApiError(404, "No level found with this id");
+    }
+
+    // 🔥 Check if level is used in Training
+    const levelIsUsing = await Training.countDocuments({
+      level: levelID,
+    });
+
+    if (levelIsUsing > 0) {
+      throw new ApiError(
+        400,
+        "This level is already assigned to training. Cannot delete.",
+      );
+    }
+
+    await Level.findByIdAndDelete(levelID);
+
+    res.status(200).json({
+      success: true,
+      msg: "Level deleted successfully",
     });
   }
 }

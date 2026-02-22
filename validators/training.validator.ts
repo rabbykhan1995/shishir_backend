@@ -35,3 +35,7 @@ export const updateTrainingSchema = createTrainingSchema.partial().extend({
   tags: z.array(z.string()).optional(),
   images: z.array(z.string()).optional(),
 });
+
+export const createLevelSchema = z.object({
+  name: z.string().min(1, "is required"),
+});

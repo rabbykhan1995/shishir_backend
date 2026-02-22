@@ -3,7 +3,12 @@ import z from "zod";
 import {
   createTrainingSchema,
   updateTrainingSchema,
+  createLevelSchema,
 } from "../validators/training.validator";
+
+export interface ILevel extends Document {
+  name: string;
+}
 
 export interface ITraining extends Document {
   title: string;
@@ -24,12 +29,12 @@ export interface ITraining extends Document {
   updatedAt: Date;
 }
 
+export type LevelResponse = HydratedDocument<ILevel>;
+export type CreateLevelInput = z.infer<typeof createLevelSchema>;
+
 export type TrainingResponse = HydratedDocument<ITraining>;
-
 export type CreateTrainingInput = z.infer<typeof createTrainingSchema>;
-
 export type UpdateTrainingInput = z.infer<typeof updateTrainingSchema>;
-
 export type TrainingListItem = Pick<
   ITraining,
   "title" | "slug" | "thumbnail" | "createdAt" | "shortDescription" | "active"
